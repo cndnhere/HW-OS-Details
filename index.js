@@ -1,8 +1,58 @@
+const express = require('express');
 // const os = require('os');
 const si = require('systeminformation');
 const { exec } = require('child_process');
 // const crypto = require('crypto');
 // const cpus = os.cpus();
+
+let cpuSrNo = '';
+let hwSrNo = '';
+let objData;
+
+const app = express();
+
+app.get('/', (req, res) => {
+    // Here, you can write your HTML content as a string
+    const htmlResponse = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-7 p-5">
+                    <div>
+                            <p class=text-danger">CPU Serial Number : ${cpuSrNo}</p>
+                            <p>Hard Disk Serial Number : ${hwSrNo}</p>
+                            <br><br>
+                            <p>Platform : ${objData.platform}</p>
+                            <p>OS : ${objData.distro}</p>
+                            <p>Hostname : ${objData.hostname}</p>
+                            <p>Serial : ${objData.serial}</p>
+                            <p>Servicepack : ${objData.servicepack}</p>
+
+                         
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    </body>
+    </html>
+    `;
+    
+    // Set the content type to HTML and send the response
+    res.header('Content-Type', 'text/html');
+    res.send(htmlResponse);
+  });
+
+
+
 // const networkInterfaces = os.networkInterfaces();
       
 // const cpuData = cpus.map(cpu => cpu.model).join('');
@@ -25,7 +75,9 @@ const { exec } = require('child_process');
 // si.cpuFlags().then(data => console.log(data));
 // si.cpuCache().then(data => console.log(data));
 //for use
-si.osInfo().then(data => console.log(data));
+si.osInfo().then(data =>{ console.log(data)
+    objData=data;
+});
 
 // si.versions().then(data => console.log(data));
 
@@ -51,13 +103,7 @@ function getCPUSerialNumber() {
   });
 }
 
-getCPUSerialNumber()
-  .then(serialNumber => {
-    console.log('CPU Serial Number:', serialNumber);
-  })
-  .catch(error => {
-    console.error(error);
-  });
+
 
 
 
@@ -83,6 +129,16 @@ function getHardDriveSerialNumber() {
 getHardDriveSerialNumber()
   .then(serialNumbers => {
     console.log('Hard Drive Serial Numbers:', serialNumbers);
+    hwSrNo = serialNumbers;
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+  getCPUSerialNumber()
+  .then(serialNumber => {
+    console.log('CPU Serial Number:', serialNumber);
+    cpuSrNo = serialNumber
   })
   .catch(error => {
     console.error(error);
@@ -91,3 +147,7 @@ getHardDriveSerialNumber()
 
 
 
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
